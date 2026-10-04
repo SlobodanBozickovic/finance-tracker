@@ -1,5 +1,7 @@
 package com.slobodanbozickovic.financetracker.account;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 @Service
@@ -15,5 +17,9 @@ public class AccountService {
         Account account = new Account(name, type);
 
         return accountRepository.save(account);
+    }
+
+    public List<Account> getAccounts() {
+        return accountRepository.findAll();
     }
 }
