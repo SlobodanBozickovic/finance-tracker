@@ -12,6 +12,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.List;
+
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestRestTemplate 
@@ -25,6 +27,9 @@ class AccountControllerTest {
 
     @Autowired
     private TestRestTemplate restTemplate;
+
+    @Autowired 
+    private AccountRepository accountRepository;
 
     @Test
     void shouldCreateAccount() {
@@ -55,18 +60,33 @@ class AccountControllerTest {
 
     @Test
     void shouldRejectAccountWithBlankName() {
-    CreateAccountRequest request =
-            new CreateAccountRequest(
-                    "",
-                    AccountType.BANK_ACCOUNT
-            );
+        CreateAccountRequest request =
+                new CreateAccountRequest(
+                        "",
+                        AccountType.BANK_ACCOUNT
+                );
 
-    var response = restTemplate.postForEntity(
-            "/api/accounts",
-            request,
-            String.class
-    );
+        var response = restTemplate.postForEntity(
+                "/api/accounts",
+                request,
+                String.class
+        );
 
-    assertThat(response.getStatusCode().value()).isEqualTo(400);
-}
+        assertThat(response.getStatusCode().value()).isEqualTo(400);
+    }
+
+
+    void shouldReturnAccouts() {
+        accountRepository.saveAllAndFlush(List.of (
+                new Account("Main account", AccountType.BANK_ACCOUNT),
+                new Account("Cash", AccountType.CASH)
+        ));
+
+        var response = restTemplate.getForEntity("/api/accounts", AccountResponse.class);
+
+        assertThat(response.getStatusCode().value()).isEqualTo(200);
+        assertThat(response.getBody()).isNotNull();
+
+        assertThat(response.getBody()).extracting(AccountResponse::name).containsExactlyInAnyOrder("Main account", "Cash");
+    }
 }
