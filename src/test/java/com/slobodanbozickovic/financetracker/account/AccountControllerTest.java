@@ -82,7 +82,7 @@ class AccountControllerTest {
                 new Account("Cash", AccountType.CASH)
         ));
 
-        var response = restTemplate.getForEntity("/api/accounts", AccountResponse.class);
+        var response = restTemplate.getForEntity("/api/accounts", AccountResponse[].class);
 
         assertThat(response.getStatusCode().value()).isEqualTo(200);
         assertThat(response.getBody()).isNotNull();
